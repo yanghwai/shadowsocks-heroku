@@ -2,12 +2,12 @@
   "name": "shadowsocks-heroku",
   "version": "0.9.10",
   "dependencies": {
-    "bufferutil": "^3.0.3",
+    "bufferutil": "^4.0.1",
     "https-proxy-agent": "^2.1.1",
     "minimist": "^1.2.0",
     "ws": "^3.3.3"
   },
-  "engines":{
+  "engines": {
     "node": "10.15.2",
     "npm": "6.4.1"
   },
