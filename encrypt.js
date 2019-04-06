@@ -13,7 +13,7 @@ const getTable = function(key) {
   const decrypt_table = new Array(256);
   const md5sum = crypto.createHash('md5');
   md5sum.update(key);
-  const hash = new Buffer(md5sum.digest(), 'binary');
+  const hash = new Buffer.from(md5sum.digest(), 'binary');
   const al = hash.readUInt32LE(0);
   const ah = hash.readUInt32LE(4);
   let i = 0;
@@ -137,7 +137,7 @@ class Encryptor {
 
   get_cipher(password, method, op, iv) {
     method = method.toLowerCase();
-    password = new Buffer(password, 'binary');
+    password = new Buffer.from(password, 'binary');
     const m = this.get_cipher_len(method);
     if (m) {
       const [key, iv_] = EVP_BytesToKey(password, m[0], m[1]);

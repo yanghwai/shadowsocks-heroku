@@ -135,7 +135,7 @@ wss.on('connection', function(ws) {
 
         if (data.length > headerLength) {
           // make sure no data is lost
-          let buf = new Buffer(data.length - headerLength);
+          let buf = new Buffer.alloc(data.length - headerLength);
           data.copy(buf, 0, headerLength);
           cachedPieces.push(buf);
           buf = null;
