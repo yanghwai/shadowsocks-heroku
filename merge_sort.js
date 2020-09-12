@@ -15,7 +15,8 @@ const merge = function(left, right, comparison) {
   }
   return result;
 };
-var merge_sort = function(array, comparison) {
+
+function mergeSort(array, comparison) {
   if (array.length < 2) {
     return array;
   }
@@ -25,5 +26,6 @@ var merge_sort = function(array, comparison) {
     merge_sort(array.slice(middle), comparison),
     comparison
   );
-};
-exports.merge_sort = merge_sort;
+}
+
+module.exports=mergeSort;

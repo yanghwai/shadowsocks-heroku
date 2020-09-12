@@ -1,6 +1,5 @@
 const net = require('net');
 const url = require('url');
-const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
@@ -31,7 +30,7 @@ const options = {
   }
 };
 
-const inetNtoa = buf => buf[0] + '.' + buf[1] + '.' + buf[2] + '.' + buf[3];
+const inetNtoa = buf => buf.join('.');
 
 const configFromArgs = parseArgs(process.argv.slice(2), options);
 const configContent = fs.readFileSync(configFromArgs.config_file);
@@ -90,7 +89,7 @@ const getServer = function() {
   }
 };
 
-var server = net.createServer(function(connection) {
+const server = net.createServer(function(connection) {
   console.log('local connected');
   server.getConnections(function(err, count) {
     console.log('concurrent connections:', count);
