@@ -3,9 +3,9 @@
   "version": "0.9.10",
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "https-proxy-agent": "^2.1.1",
-    "minimist": "^1.2.0",
-    "ws": "^3.3.3"
+    "https-proxy-agent": "^2.2.4",
+    "minimist": "^1.2.5",
+    "ws": "^6.1.4"
   },
   "engines": {
     "node": "10.15.2",
