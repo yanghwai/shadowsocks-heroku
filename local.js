@@ -59,7 +59,7 @@ if (HTTPPROXY) {
   console.log('http proxy:', HTTPPROXY);
 }
 
-const prepareServer = function(address) {
+const prepareServer = function (address) {
   const serverUrl = url.parse(address);
   serverUrl.slashes = true;
   if (!serverUrl.protocol) {
@@ -81,7 +81,7 @@ if (SERVER instanceof Array) {
   SERVER = prepareServer(SERVER);
 }
 
-const getServer = function() {
+function getServer() {
   if (SERVER instanceof Array) {
     return SERVER[Math.floor(Math.random() * SERVER.length)];
   } else {
@@ -89,9 +89,9 @@ const getServer = function() {
   }
 };
 
-const server = net.createServer(function(connection) {
+const server = net.createServer(function (connection) {
   console.log('local connected');
-  server.getConnections(function(err, count) {
+  server.getConnections(function (err, count) {
     console.log('concurrent connections:', count);
   });
   const encryptor = new Encryptor(KEY, METHOD);
@@ -105,7 +105,7 @@ const server = net.createServer(function(connection) {
   let remotePort = null;
   let addrToSend = '';
   const aServer = getServer();
-  connection.on('data', function(data) {
+  connection.on('data', function (data) {
     if (stage === 5) {
       // pipe sockets
       data = encryptor.encrypt(data);
@@ -193,7 +193,7 @@ const server = net.createServer(function(connection) {
           });
         }
 
-        ws.on('open', function() {
+        ws.on('open', function () {
           console.log(`connecting ${remoteAddr} via ${aServer}`);
           let addrToSendBuf = new Buffer.from(addrToSend, 'binary');
           addrToSendBuf = encryptor.encrypt(addrToSendBuf);
@@ -212,21 +212,21 @@ const server = net.createServer(function(connection) {
           ping = setInterval(() => ws.ping('', null, true), 50 * 1000);
         });
 
-        ws.on('message', function(data, flags) {
+        ws.on('message', function (data, flags) {
           data = encryptor.decrypt(data);
           connection.write(data);
         });
 
-        ws.on('close', function() {
+        ws.on('close', function () {
           clearInterval(ping);
           console.log('remote disconnected');
           connection.destroy();
         });
 
-        ws.on('error', function(e) {
+        ws.on('error', function (e) {
           console.log(`remote ${remoteAddr}:${remotePort} error: ${e}`);
           connection.destroy();
-          server.getConnections(function(err, count) {
+          server.getConnections(function (err, count) {
             console.log('concurrent connections:', count);
           });
         });
@@ -252,27 +252,27 @@ const server = net.createServer(function(connection) {
     }
   });
 
-  connection.on('end', function() {
+  connection.on('end', function () {
     console.log('local disconnected');
     if (ws) {
       ws.terminate();
     }
-    server.getConnections(function(err, count) {
+    server.getConnections(function (err, count) {
       console.log('concurrent connections:', count);
     });
   });
 
-  connection.on('error', function(e) {
+  connection.on('error', function (e) {
     console.log(`local error: ${e}`);
     if (ws) {
       ws.terminate();
     }
-    server.getConnections(function(err, count) {
+    server.getConnections(function (err, count) {
       console.log('concurrent connections:', count);
     });
   });
 
-  connection.setTimeout(timeout, function() {
+  connection.setTimeout(timeout, function () {
     console.log('local timeout');
     connection.destroy();
     if (ws) {
@@ -281,12 +281,12 @@ const server = net.createServer(function(connection) {
   });
 });
 
-server.listen(PORT, LOCAL_ADDRESS, function() {
+server.listen(PORT, LOCAL_ADDRESS, function () {
   const address = server.address();
   console.log('server listening at', address);
 });
 
-server.on('error', function(e) {
+server.on('error', function (e) {
   if (e.code === 'EADDRINUSE') {
     console.log('address in use, aborting');
   }
