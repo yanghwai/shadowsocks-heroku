@@ -61,4 +61,4 @@ typings/
 .next
 
 # local client shell script
-run_client.sh
+*.sh
