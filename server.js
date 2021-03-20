@@ -1,13 +1,11 @@
-import { connect } from 'net';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { createServer } from 'http';
-import WebSocket from 'ws';
-import parseArgs from 'minimist';
-import { Encryptor } from './lib/encrypt.js';
-
+const net = require('net');
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+const WebSocket = require('ws');
 const WebSocketServer = WebSocket.Server;
-let __dirname = process.cwd();
+const parseArgs = require('minimist');
+const { Encryptor } = require('./encrypt');
 
 const options = {
   alias: {
@@ -19,7 +17,7 @@ const options = {
   },
   string: ['local_address', 'password', 'method', 'config_file'],
   default: {
-    config_file: resolve(__dirname, 'config.json')
+    config_file: path.resolve(__dirname, 'config.json')
   }
 };
 
@@ -27,7 +25,7 @@ const inetNtoa = buf => buf[0] + '.' + buf[1] + '.' + buf[2] + '.' + buf[3];
 
 const configFromArgs = parseArgs(process.argv.slice(2), options);
 const configFile = configFromArgs.config_file;
-const configContent = readFileSync(configFile);
+const configContent = fs.readFileSync(configFile);
 const config = JSON.parse(configContent);
 
 if (process.env.PORT) {
@@ -55,14 +53,14 @@ if (['', 'null', 'table'].includes(METHOD.toLowerCase())) {
   METHOD = null;
 }
 
-const server = createServer((req, res) => {
+const server = http.createServer(function(req, res) {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('asdf.');
 });
 
 const wss = new WebSocketServer({ server });
 
-wss.on('connection', (ws) => {
+wss.on('connection', function(ws) {
   console.log('server connected');
   console.log('concurrent connections:', wss.clients.size);
   const encryptor = new Encryptor(KEY, METHOD);
@@ -73,7 +71,7 @@ wss.on('connection', (ws) => {
   let addrLen = 0;
   let remoteAddr = null;
   let remotePort = null;
-  ws.on('message', (data, flags) => {
+  ws.on('message', function(data, flags) {
     data = encryptor.decrypt(data);
     if (stage === 5) {
       remote.write(data);
@@ -100,36 +98,36 @@ wss.on('connection', (ws) => {
         }
 
         // connect remote server
-        remote = connect(remotePort, remoteAddr, () => {
-            console.log('connecting', remoteAddr);
-            let i = 0;
+        remote = net.connect(remotePort, remoteAddr, function() {
+          console.log('connecting', remoteAddr);
+          let i = 0;
 
-            while (i < cachedPieces.length) {
-              const piece = cachedPieces[i];
-              remote.write(piece);
-              i++;
-            }
-            cachedPieces = null; // save memory
-            stage = 5;
-          });
-        remote.on('data', (data) => {
+          while (i < cachedPieces.length) {
+            const piece = cachedPieces[i];
+            remote.write(piece);
+            i++;
+          }
+          cachedPieces = null; // save memory
+          stage = 5;
+        });
+        remote.on('data', function(data) {
           data = encryptor.encrypt(data);
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(data, { binary: true });
           }
         });
 
-        remote.on('end', () => {
+        remote.on('end', function() {
           ws.close();
           console.log('remote disconnected');
         });
 
-        remote.on('error', (e) => {
+        remote.on('error', function(e) {
           ws.terminate();
           console.log(`remote: ${e}`);
         });
 
-        remote.setTimeout(timeout, () => {
+        remote.setTimeout(timeout, function() {
           console.log('remote timeout');
           remote.destroy();
           ws.close();
@@ -162,7 +160,7 @@ wss.on('connection', (ws) => {
 
   ws.on('ping', () => ws.pong('', null, true));
 
-  ws.on('close', () => {
+  ws.on('close', function() {
     console.log('server disconnected');
     console.log('concurrent connections:', wss.clients.size);
     if (remote) {
@@ -170,7 +168,7 @@ wss.on('connection', (ws) => {
     }
   });
 
-  ws.on('error', (e) => {
+  ws.on('error', function(e) {
     console.warn(`server: ${e}`);
     console.log('concurrent connections:', wss.clients.size);
     if (remote) {
@@ -179,12 +177,12 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, LOCAL_ADDRESS, () => {
+server.listen(PORT, LOCAL_ADDRESS, function() {
   const address = server.address();
   console.log('server listening at', address);
 });
 
-server.on('error', (e) => {
+server.on('error', function(e) {
   if (e.code === 'EADDRINUSE') {
     console.log('address in use, aborting');
   }

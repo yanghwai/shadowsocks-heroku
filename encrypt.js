@@ -1,17 +1,17 @@
-import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'crypto';
-import { mergeSort } from './merge_sort.js';
+const crypto = require('crypto');
+const { merge_sort } = require('./merge_sort');
 const int32Max = Math.pow(2, 32);
 
 const cachedTables = {}; // password: [encryptTable, decryptTable]
 
-function getTable(key) {
+const getTable = function(key) {
   if (cachedTables[key]) {
     return cachedTables[key];
   }
   console.log('calculating ciphers');
   let table = new Array(256);
   const decrypt_table = new Array(256);
-  const md5sum = createHash('md5');
+  const md5sum = crypto.createHash('md5');
   md5sum.update(key);
   const hash = new Buffer.from(md5sum.digest(), 'binary');
   const al = hash.readUInt32LE(0);
@@ -25,7 +25,7 @@ function getTable(key) {
   i = 1;
 
   while (i < 1024) {
-    table = mergeSort(
+    table = merge_sort(
       table,
       (x, y) =>
         ((ah % (x + i)) * int32Max + al) % (x + i) -
@@ -63,7 +63,7 @@ const EVP_BytesToKey = function(password, key_len, iv_len) {
   let i = 0;
   let count = 0;
   while (count < key_len + iv_len) {
-    const md5 = createHash('md5');
+    const md5 = crypto.createHash('md5');
     let data = password;
     if (i > 0) {
       data = Buffer.concat([m[i - 1], password]);
@@ -99,14 +99,14 @@ const method_supported = {
 };
 
 const create_rc4_md5_cipher = function(key, iv, op) {
-  const md5 = createHash('md5');
+  const md5 = crypto.createHash('md5');
   md5.update(key);
   md5.update(iv);
   const rc4_key = md5.digest();
   if (op === 1) {
-    return createCipheriv('rc4', rc4_key, '');
+    return crypto.createCipheriv('rc4', rc4_key, '');
   } else {
-    return createDecipheriv('rc4', rc4_key, '');
+    return crypto.createDecipheriv('rc4', rc4_key, '');
   }
 };
 
@@ -123,7 +123,7 @@ class Encryptor {
         this.key,
         this.method,
         1,
-        randomBytes(32)
+        crypto.randomBytes(32)
       );
     } else {
       [this.encryptTable, this.decryptTable] = getTable(this.key);
@@ -152,9 +152,9 @@ class Encryptor {
         return create_rc4_md5_cipher(key, iv, op);
       } else {
         if (op === 1) {
-          return createCipheriv(method, key, iv);
+          return crypto.createCipheriv(method, key, iv);
         } else {
-          return createDecipheriv(method, key, iv);
+          return crypto.createDecipheriv(method, key, iv);
         }
       }
     }
@@ -193,4 +193,5 @@ class Encryptor {
   }
 }
 
-export { Encryptor, getTable };
+exports.Encryptor = Encryptor;
+exports.getTable = getTable;

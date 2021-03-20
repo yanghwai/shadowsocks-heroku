@@ -1,4 +1,4 @@
-function merge(left, right, comparison) {
+const merge = function(left, right, comparison) {
   const result = new Array();
   while (left.length > 0 && right.length > 0) {
     if (comparison(left[0], right[0]) <= 0) {
@@ -22,10 +22,10 @@ function mergeSort(array, comparison) {
   }
   const middle = Math.ceil(array.length / 2);
   return merge(
-    mergeSort(array.slice(0, middle), comparison),
-    mergeSort(array.slice(middle), comparison),
+    merge_sort(array.slice(0, middle), comparison),
+    merge_sort(array.slice(middle), comparison),
     comparison
   );
 }
 
-export { mergeSort };
+module.exports=mergeSort;
