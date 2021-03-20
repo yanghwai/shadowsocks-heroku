@@ -13,5 +13,25 @@
   },
   "scripts": {
     "start": "node server.js -b 0.0.0.0"
-  }
+  },
+  "target": "es6",
+  "module": "es6",
+  "type": "module",
+  "description": "shadowsocks-heroku\r ==================",
+  "main": "local.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrluanma/shadowsocks-heroku.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mrluanma/shadowsocks-heroku/issues"
+  },
+  "homepage": "https://github.com/mrluanma/shadowsocks-heroku#readme"
 }

@@ -1,11 +1,13 @@
-const net = require('net');
-const url = require('url');
-const fs = require('fs');
-const path = require('path');
-const WebSocket = require('ws');
-const parseArgs = require('minimist');
-const HttpsProxyAgent = require('https-proxy-agent');
-const { Encryptor } = require('./encrypt');
+import { createServer } from 'net';
+import { parse, format } from 'url';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import WebSocket from 'ws';
+import parseArgs from 'minimist';
+import HttpsProxyAgent from 'https-proxy-agent';
+import { Encryptor } from './lib/encrypt.js'
+
+let __dirname = process.cwd();
 
 const options = {
   alias: {
@@ -26,14 +28,14 @@ const options = {
     'scheme'
   ],
   default: {
-    config_file: path.resolve(__dirname, 'config.json')
+    config_file: resolve(__dirname, 'config.json')
   }
 };
 
 const inetNtoa = buf => buf.join('.');
 
 const configFromArgs = parseArgs(process.argv.slice(2), options);
-const configContent = fs.readFileSync(configFromArgs.config_file);
+const configContent = readFileSync(configFromArgs.config_file);
 const config = JSON.parse(configContent);
 for (let k in configFromArgs) {
   const v = configFromArgs[k];
@@ -60,7 +62,7 @@ if (HTTPPROXY) {
 }
 
 function prepareServer(address) {
-  const serverUrl = url.parse(address);
+  const serverUrl = parse(address);
   serverUrl.slashes = true;
   if (!serverUrl.protocol) {
     serverUrl.protocol = SCHEME;
@@ -72,7 +74,7 @@ function prepareServer(address) {
   if (!serverUrl.port) {
     serverUrl.port = REMOTE_PORT;
   }
-  return url.format(serverUrl);
+  return format(serverUrl);
 };
 
 if (SERVER instanceof Array) {
@@ -89,7 +91,7 @@ function getServer() {
   }
 };
 
-const server = net.createServer((connection) => {
+const server = createServer((connection) => {
     console.log('local connected');
     server.getConnections((_, count) => {
         console.log('concurrent connections:', count);
@@ -167,10 +169,10 @@ const server = net.createServer((connection) => {
               if (HTTPPROXY) {
                 // WebSocket endpoint for the proxy to connect to
                 const endpoint = aServer;
-                const parsed = url.parse(endpoint);
+                const parsed = parse(endpoint);
                 //console.log('attempting to connect to WebSocket %j', endpoint);
                 // create an instance of the `HttpsProxyAgent` class with the proxy server information
-                const opts = url.parse(HTTPPROXY);
+                const opts = parse(HTTPPROXY);
 
                 // IMPORTANT! Set the `secureEndpoint` option to `false` when connecting
                 //            over "ws://", but `true` when connecting over "wss://"
